@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AppLayout, Stack, Field, Pill, type Meta } from './ui';
-import { ask, hasKey } from './lib/ai';
+import { ask } from './lib/ai';
 
 const M: Meta = {
   id: 5, icon: '🚀', title: 'AI 창업 아이템 코치', tagline: '아이디어→린캔버스→정부지원사업 매칭', members: ['이시민', '조윤서'], color: '#f59e0b', ai: true,
