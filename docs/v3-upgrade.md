@@ -16,3 +16,5 @@
 
 ## 스택
 React 18 · TypeScript · Vite · OpenAI GPT · SVG/CSS 차트 · localStorage
+
+## v4 — 진단 4단계 파이프라인 애니메이션

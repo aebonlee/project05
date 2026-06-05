@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { AppLayout, Stack, Field, Chip, useLocalStorage, type Meta } from './ui';
 import { ask, hasKey } from './lib/ai';
+import { Pipeline } from './lib/flow';
+
+const PIPE = ['아이디어 구조화', '린 캔버스 작성', '경쟁·리스크 분석', 'DFV 점수 산출'];
 
 const M: Meta = {
   id: 5, icon: '🚀', title: 'AI 창업 아이템 코치', tagline: '아이디어 한 줄을 넣으면 AI가 린 캔버스·경쟁·리스크·MVP·DFV 점수까지 진단해 줘요',
@@ -129,7 +132,7 @@ function Feature() {
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useLocalStorage<Saved[]>('startup.ideas', []);
 
-  const run = async () => { setLoading(true); setDiag(await getDiag(field, target, stage, kw)); setLoading(false); requestAnimationFrame(() => document.getElementById('diag-top')?.scrollIntoView({ behavior: 'smooth' })); };
+  const run = () => { setLoading(true); requestAnimationFrame(() => document.getElementById('diag-top')?.scrollIntoView({ behavior: 'smooth' })); };
   const save = () => { if (diag) setSaved([{ ...diag, id: Date.now(), title: kw.trim() || diag.one_liner.slice(0, 24) }, ...saved].slice(0, 20)); };
 
   return (
@@ -148,7 +151,7 @@ function Feature() {
       </div>
 
       <div id="diag-top" />
-      {loading && <div className="spinner" />}
+      {loading && <Pipeline color={M.color} icon="🚀" title="아이템을 진단하는 중…" steps={PIPE} run={() => getDiag(field, target, stage, kw)} onDone={(d) => { setDiag(d); setLoading(false); }} />}
       {diag && !loading && (
         <Stack gap={18}>
           <div className="callout-soft" style={{ background: `${M.color}12`, border: `1px solid ${M.color}40`, alignItems: 'center' }}>
