@@ -82,6 +82,15 @@ const M: Meta = {
     { title: '아이디어 비교', body: '저장 아이디어를 종합 점수로 정렬해 의사결정을 돕습니다. 상태는 localStorage에 누적됩니다.' },
     { title: '정적 배포', body: 'Vite + React + TS, GitHub Pages 자동 배포. 백엔드·DB 없이 클라이언트에서 완결됩니다.' },
   ],
+  scope: {
+    include: ['아이디어 입력 → DFV 점수·린 캔버스·경쟁·리스크·MVP 진단', '아이디어 저장·종합 점수 비교', 'AI 진단 + 키 없을 때 휴리스틱 폴백'],
+    exclude: ['실제 시장 데이터·경쟁사 크롤링', '사용자 계정·서버 저장', '투자 매칭·팀 빌딩 기능'],
+  },
+  pitch: [
+    '아이디어를 "느낌"이 아니라 DFV 점수·린 캔버스로 구조화해 비교한다는 점',
+    '키가 없어도 휴리스틱 폴백으로 항상 진단이 나와 시연이 안전하다는 점',
+    '한 번의 json_object 호출로 캔버스·점수·리스크·MVP를 일관되게 받는 설계',
+  ],
   stack: ['React 18', 'TypeScript', 'Vite', 'OpenAI GPT', 'localStorage'],
   architecture:
     '백엔드 없는 React 단일 페이지(SPA). 공통 레이아웃·5탭·UI 헬퍼는 src/ui.tsx, 진단 기능은 src/App.tsx의 Feature가 담당한다. ' +
