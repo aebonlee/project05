@@ -12,6 +12,24 @@ const M: Meta = {
     '창업 초기에는 아이디어를 구조화하고 시장성을 검증하는 일이 가장 어렵습니다. ' +
     '본 코치는 분야·고객·단계·키워드를 입력하면 AI가 한 줄 정의부터 린 캔버스, 수익모델, 경쟁사, 리스크와 대응, MVP 단계, ' +
     'DFV(바람직성·실현성·수익성) 점수까지 한 번에 진단하고, 아이디어를 저장해 비교할 수 있게 합니다.',
+  targets: ['예비·초기 창업자', '아이디어를 검증하려는 직장인·학생', '창업 교육·해커톤 참가자'],
+  goals: [
+    '머릿속 아이디어를 린 캔버스·DFV 점수로 구조화해 비교 가능하게 만든다',
+    'AI로 경쟁·리스크·MVP 단계를 빠르게 도출해 다음 행동을 명확히 한다',
+    'API 키가 없어도 휴리스틱 폴백으로 항상 결과가 나오게 한다',
+  ],
+  scenarios: [
+    '분야·목표 고객·단계를 고르고 아이디어 키워드를 입력해 즉시 진단을 받는다',
+    'DFV 점수와 린 캔버스로 강·약점을 파악하고 MVP 다음 단계를 확인한다',
+    '여러 아이디어를 저장해 종합 점수로 정렬·비교하며 의사결정한다',
+  ],
+  screens: [
+    { name: '입력 스튜디오', desc: '분야·목표 고객·단계·아이디어 키워드를 선택/입력' },
+    { name: 'DFV 점수', desc: '바람직성·실현성·수익성을 0~100 막대로 시각화 + 종합 점수 배지' },
+    { name: '린 캔버스', desc: '문제·해결·고유가치·고객·채널·수익·비용 7칸 + 수익 모델' },
+    { name: '경쟁 · 리스크 · MVP', desc: '예상 경쟁/대안, 리스크-대응 매트릭스, MVP 검증 3단계' },
+    { name: '아이디어 보관함', desc: '저장 아이디어를 종합 점수로 정렬해 비교·열기·삭제' },
+  ],
   features: [
     { icon: '🧩', title: '린 캔버스 자동 작성', desc: '문제·해결·가치·고객·채널·수익·비용을 한눈에' },
     { icon: '📊', title: 'DFV 점수 진단', desc: '바람직성·실현성·수익성을 점수와 막대로 시각화' },
@@ -44,6 +62,20 @@ const M: Meta = {
     '시각화 — DFV 점수 막대 + 린 캔버스 그리드 + 리스크 매트릭스',
     '관리 — 아이디어 localStorage 저장 → 점수 비교',
   ],
+  pipelineDetail: [
+    { step: '아이디어 수집', detail: '분야·목표 고객·단계·키워드를 구조화해 진단 입력으로 만든다.' },
+    { step: '진단 합성 · 스키마 강제', detail: '린 캔버스/DFV/MVP 프레임을 system 프롬프트로 지시하고 JSON 스키마를 고정해 일관된 응답을 받는다.' },
+    { step: 'GPT 호출(json_object)', detail: 'ask(...)로 temperature 0.6, max_tokens 1500, response_format=json_object 호출 → one_liner·canvas·competitors·risks·mvp_steps·score 수신.' },
+    { step: '검증 · 폴백', detail: 'JSON 파싱 실패나 canvas 누락 시 fallbackDiag() 휴리스틱 템플릿으로 대체해 항상 결과를 보장한다.' },
+    { step: '정규화 · 시각화', detail: 'DFV 점수를 0~100으로 clamp해 막대 너비로 환산하고 린 캔버스 그리드·리스크 카드로 렌더한다.' },
+    { step: '보관 · 비교', detail: '진단을 localStorage(startup.ideas)에 최대 20개 저장하고 종합 점수로 정렬해 비교한다.' },
+  ],
+  promptNotes: [
+    'system 프롬프트로 린스타트업·VC 관점을 지정하고 "과장 금지, 점수 0~100 정수"로 톤·범위를 제한한다.',
+    '응답을 반드시 JSON만으로 받도록 정확한 스키마(one_liner·canvas 7키·revenue_model·competitors·risks·mvp_steps·score)를 명시하고 response_format을 json_object로 강제한다.',
+    'user 프롬프트에 "경쟁 2~3, 리스크 2~3, MVP 3단계, 한국어" 출력 제약을 넣어 분량과 형식을 통제한다.',
+    'API 키가 없으면 호출 없이 fallbackDiag()로 동일 구조의 샘플을 만들어 오프라인에서도 동작한다.',
+  ],
   techNotes: [
     { title: '단일 구조화 진단', body: '캔버스·수익모델·경쟁·리스크·MVP·점수를 한 번의 json_object로 받아 일관된 진단 포맷을 보장합니다.' },
     { title: '점수 정규화', body: 'DFV 점수를 0~100으로 클램프해 막대 너비로 환산, 외부 차트 없이 비교 가능한 시각화를 제공합니다.' },
@@ -51,6 +83,24 @@ const M: Meta = {
     { title: '정적 배포', body: 'Vite + React + TS, GitHub Pages 자동 배포. 백엔드·DB 없이 클라이언트에서 완결됩니다.' },
   ],
   stack: ['React 18', 'TypeScript', 'Vite', 'OpenAI GPT', 'localStorage'],
+  architecture:
+    '백엔드 없는 React 단일 페이지(SPA). 공통 레이아웃·5탭·UI 헬퍼는 src/ui.tsx, 진단 기능은 src/App.tsx의 Feature가 담당한다. ' +
+    'OpenAI 호출은 src/lib/ai.ts, 단계 진행 애니메이션은 src/lib/flow.tsx의 Pipeline 컴포넌트가 처리하며, 저장 상태는 전적으로 브라우저 localStorage에 둔다.',
+  structure: [
+    { path: 'src/App.tsx', desc: '진단 기능(Feature) + 메타(M) 정의' },
+    { path: 'src/ui.tsx', desc: '공통 레이아웃·5탭·Field/Chip/Pill 등 UI 헬퍼' },
+    { path: 'src/lib/ai.ts', desc: 'OpenAI chat 헬퍼(ask/hasKey) — 키는 env 또는 localStorage' },
+    { path: 'src/lib/flow.tsx', desc: '단계별 진행 애니메이션 Pipeline 컴포넌트' },
+    { path: 'src/index.css', desc: '다크/라이트 테마·컴포넌트 스타일' },
+  ],
+  dataModel: [
+    { name: 'Diag', desc: 'one_liner·canvas·revenue_model·competitors·risks·mvp_steps·score를 담은 진단 결과' },
+    { name: 'Canvas', desc: '린 캔버스 7요소(problem·solution·unique_value·customer·channels·revenue·cost)' },
+    { name: 'Score (DFV)', desc: 'desirability·feasibility·viability 0~100 정수, 평균이 종합 점수' },
+    { name: 'Saved', desc: 'Diag + id·title. localStorage 키 "startup.ideas"에 최대 20개 누적' },
+  ],
+  deploy:
+    'Vite 빌드(base: "./") 후 GitHub Actions(deploy.yml)가 main push 시 GitHub Pages로 자동 배포 → aebonlee.github.io/project05/',
   links: [
     { label: 'Lean Canvas (Leanstack)', url: 'https://leanstack.com/lean-canvas' },
     { label: 'K-Startup', url: 'https://www.k-startup.go.kr' },
